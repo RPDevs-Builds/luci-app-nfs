@@ -53,10 +53,10 @@ jobs:
           echo "Maintainer: Gemini CLI" >> ipk_tmp/CONTROL/control
           echo "Depends: luci-base, nfs-kernel-server" >> ipk_tmp/CONTROL/control
           echo "Description: LuCI app for NFS kernel server management" >> ipk_tmp/CONTROL/control
-          [ -d source/luci-app-nfs/root ] && cp -r source/luci-app-nfs/root/* ipk_tmp/
+          [ -d source/luci-app-nfs/root ] && cp -r source/luci-app-nfs/root/. ipk_tmp/
           [ -d source/luci-app-nfs/htdocs ] && {
             mkdir -p ipk_tmp/www
-            cp -r source/luci-app-nfs/htdocs/* ipk_tmp/www/
+            cp -r source/luci-app-nfs/htdocs/. ipk_tmp/www/
           }
           tar -cvzf compiled/packages/luci-app-nfs_${VERSION}-1_all.ipk -C ipk_tmp .
 
@@ -68,12 +68,12 @@ jobs:
           
           # 1. Create Data Tarball
           mkdir -p apk_data
-          [ -d source/luci-app-nfs/root ] && cp -r source/luci-app-nfs/root/* apk_data/
+          [ -d source/luci-app-nfs/root ] && cp -r source/luci-app-nfs/root/. apk_data/
           [ -d source/luci-app-nfs/htdocs ] && {
             mkdir -p apk_data/www
-            cp -r source/luci-app-nfs/htdocs/* apk_data/www/
+            cp -r source/luci-app-nfs/htdocs/. apk_data/www/
           }
-          tar -zc -f data.tar.gz -C apk_data .
+          tar -c --owner=0 --group=0 -C apk_data . | gzip -9n > data.tar.gz
           
           # 2. Create Control Tarball (.PKGINFO)
           mkdir -p apk_control
@@ -86,10 +86,15 @@ jobs:
           echo "arch = all" >> apk_control/.PKGINFO
           echo "depend = luci-base" >> apk_control/.PKGINFO
           echo "depend = nfs-kernel-server" >> apk_control/.PKGINFO
-          tar -zc -f control.tar.gz -C apk_control .PKGINFO
+          tar -c --owner=0 --group=0 -C apk_control .PKGINFO | gzip -9n > control.tar.gz
           
           # 3. Combine into final APK (Control + Data)
           cat control.tar.gz data.tar.gz > compiled/apk/luci-app-nfs-${VERSION}-r1.apk
+          
+          # Diagnostics
+          ls -l control.tar.gz data.tar.gz compiled/apk/luci-app-nfs-${VERSION}-r1.apk
+          tar -tvf control.tar.gz
+          # Note: tar -tvf on the combined APK will only show the first part, which is correct
 
       - name: Create Source Tarball
         run: |
