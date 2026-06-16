@@ -109,10 +109,14 @@ jobs:
 
       - name: Update local mirror
         run: |
-          sudo mkdir -p /shares/gitstore/openwrt/luci-app-nfs
-          sudo chown -R $USER:$USER /shares/gitstore/openwrt
-          [ -d /shares/gitstore/openwrt/luci-app-nfs/.git ] || git clone --mirror https://github.com/RPDevs-Builds/luci-app-nfs.git /shares/gitstore/openwrt/luci-app-nfs
-          cd /shares/gitstore/openwrt/luci-app-nfs && git remote update
+          sudo mkdir -p /shares/gitstore/openwrt
+          sudo chown -R $(id -u):$(id -g) /shares/gitstore/openwrt
+          if [ ! -d /shares/gitstore/openwrt/luci-app-nfs/.git ]; then
+            rm -rf /shares/gitstore/openwrt/luci-app-nfs
+            git clone --mirror https://github.com/RPDevs-Builds/luci-app-nfs.git /shares/gitstore/openwrt/luci-app-nfs
+          else
+            cd /shares/gitstore/openwrt/luci-app-nfs && git remote update
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -135,8 +139,8 @@ jobs:
           APK_FILE=$(ls compiled/apk/luci-app-nfs-*.apk | head -n 1)
           echo "Testing installation of $APK_FILE"
           # Assuming the runner has SSH access to the router via keys
-          scp "$APK_FILE" root@192.168.2.1:/tmp/test.apk
-          ssh root@192.168.2.1 "apk add --allow-untrusted /tmp/test.apk && /etc/init.d/nfsd reload"
+          scp -o StrictHostKeyChecking=no "$APK_FILE" root@192.168.2.1:/tmp/test.apk
+          ssh -o StrictHostKeyChecking=no root@192.168.2.1 "apk add --allow-untrusted /tmp/test.apk && /etc/init.d/nfsd reload"
 
   release:
     needs: test
