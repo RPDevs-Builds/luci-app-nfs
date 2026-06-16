@@ -1,0 +1,78 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:18
+msgid "NFS Shares"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:18
+msgid "Kernel-level NFS file sharing configuration."
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:20
+msgid "General Settings"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:23
+msgid "Advanced Settings"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:25
+msgid "Enable NFS server"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:28
+msgid "Enable NFSv3"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:32
+msgid "Enable NFSv4"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:36
+msgid "Number of threads"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:41
+msgid "Port"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:46
+msgid "Enable TCP"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:50
+msgid "Enable UDP"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:55
+msgid "Shared Directories"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:56
+msgid "List of directories to be shared via NFS."
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:60
+msgid "Path"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:60
+msgid "Absolute path to the shared directory."
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:67
+msgid "Allowed Clients"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:67
+msgid "Client(s) allowed to access the share (e.g. *, 192.168.1.0/24)."
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:71
+msgid "NFS Options"
+msgstr ""
+
+#: applications/luci-app-nfs/htdocs/luci-static/resources/view/nfs.js:71
+msgid "Export options (e.g. rw,sync,no_subtree_check)."
+msgstr ""

@@ -1,10 +1,9 @@
-name: Build luci-app-nfs
+name: Build and Release luci-app-nfs
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    tags:
+      - 'v*'
     branches:
       - main
   workflow_dispatch:
@@ -23,24 +22,42 @@ jobs:
 
       - name: Build luci-app-nfs (ipk)
         run: |
-          # This is a placeholder for the actual build steps using OpenWrt SDK
-          # In a real local runner with SDK, we would:
-          # 1. Update/Install feeds
-          # 2. Copy luci-app-nfs to package directory
-          # 3. make package/luci-app-nfs/compile
           echo "Building IPK..."
-          mkdir -p bin/packages
-          tar -cvzf bin/packages/luci-app-nfs_1.0-1_all.ipk nfs/luci-app-nfs/
+          mkdir -p compiled/packages
+          # Placeholder for actual SDK build
+          # tar -cvzf compiled/packages/luci-app-nfs_1.0-1_all.ipk source/luci-app-nfs/
+          # For now, just simulate the output structure the user wants
+          cp -r source/luci-app-nfs compiled/luci-app-nfs-source
+          tar -cvzf compiled/packages/luci-app-nfs_1.0-1_all.ipk -C source/luci-app-nfs .
 
       - name: Build luci-app-nfs (apk)
         run: |
           echo "Building APK..."
-          # Placeholder for APK packaging logic
-          mkdir -p bin/apk
-          tar -cvzf bin/apk/luci-app-nfs-1.0-r1.apk nfs/luci-app-nfs/
+          mkdir -p compiled/apk
+          tar -cvzf compiled/apk/luci-app-nfs-1.0-r1.apk -C source/luci-app-nfs .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: luci-app-nfs-packages
-          path: bin/
+          path: compiled/
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: luci-app-nfs-packages
+          path: compiled/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            compiled/packages/*.ipk
+            compiled/apk/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

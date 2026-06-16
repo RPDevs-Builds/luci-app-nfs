@@ -2,11 +2,17 @@
 
 A modern LuCI application for managing the NFS (Network File System) kernel server on OpenWrt. This application provides a user-friendly web interface for configuring NFS v3 and v4 exports, bridging the gap between LuCI and the native Linux NFS configuration.
 
+## Project Structure
+
+- `source/luci-app-nfs`: Source code for the LuCI application.
+- `compiled/`: Directory where build artifacts are generated.
+
 ## Features
 
 - **UCI Managed**: All settings are stored in `/etc/config/nfs`, allowing for consistent management via LuCI, CLI, or automation scripts.
 - **Unified Init Script**: A custom `/etc/init.d/nfsd` script handles the translation of UCI configuration to the native `/etc/exports` file and manages the underlying NFS daemons.
 - **NFS v3 & v4 Support**: Easily toggle between NFS v3 and v4, or enable both simultaneously.
+- **Advanced NFS Tuning**: Configure thread count, ports, and transport protocols (TCP/UDP) directly from the UI.
 - **Flexible Export Management**:
   - Define shared directory paths.
   - Specify allowed clients (IP addresses, subnets, or wildcards).
