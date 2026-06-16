@@ -8,12 +8,17 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up build environment
         run: |
@@ -24,10 +29,6 @@ jobs:
         run: |
           echo "Building IPK..."
           mkdir -p compiled/packages
-          # Placeholder for actual SDK build
-          # tar -cvzf compiled/packages/luci-app-nfs_1.0-1_all.ipk source/luci-app-nfs/
-          # For now, just simulate the output structure the user wants
-          cp -r source/luci-app-nfs compiled/luci-app-nfs-source
           tar -cvzf compiled/packages/luci-app-nfs_1.0-1_all.ipk -C source/luci-app-nfs .
 
       - name: Build luci-app-nfs (apk)
@@ -35,6 +36,15 @@ jobs:
           echo "Building APK..."
           mkdir -p compiled/apk
           tar -cvzf compiled/apk/luci-app-nfs-1.0-r1.apk -C source/luci-app-nfs .
+
+      - name: Sync compiled output to repository
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add compiled/
+          git commit -m "Update compiled artifacts [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:${{ github.ref }} || echo "Failed to push"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
