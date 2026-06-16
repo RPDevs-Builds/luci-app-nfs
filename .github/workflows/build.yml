@@ -37,6 +37,10 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version $VERSION"
 
+      - name: Clean previous artifacts
+        run: |
+          rm -rf compiled/*
+
       - name: Build luci-app-nfs (ipk)
         run: |
           VERSION="${{ steps.get_version.outputs.VERSION }}"
