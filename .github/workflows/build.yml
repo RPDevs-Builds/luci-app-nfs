@@ -47,14 +47,12 @@ jobs:
           echo "Building IPK v$VERSION..."
           mkdir -p compiled/packages
           mkdir -p ipk_tmp/CONTROL
-          cat > ipk_tmp/CONTROL/control <<EOF
-Package: luci-app-nfs
-Version: $VERSION-1
-Architecture: all
-Maintainer: Gemini CLI
-Depends: luci-base, nfs-kernel-server
-Description: LuCI app for NFS kernel server management
-EOF
+          echo "Package: luci-app-nfs" > ipk_tmp/CONTROL/control
+          echo "Version: $VERSION-1" >> ipk_tmp/CONTROL/control
+          echo "Architecture: all" >> ipk_tmp/CONTROL/control
+          echo "Maintainer: Gemini CLI" >> ipk_tmp/CONTROL/control
+          echo "Depends: luci-base, nfs-kernel-server" >> ipk_tmp/CONTROL/control
+          echo "Description: LuCI app for NFS kernel server management" >> ipk_tmp/CONTROL/control
           [ -d source/luci-app-nfs/root ] && cp -r source/luci-app-nfs/root/* ipk_tmp/
           [ -d source/luci-app-nfs/htdocs ] && {
             mkdir -p ipk_tmp/www
@@ -79,17 +77,15 @@ EOF
           
           # 2. Create Control Tarball (.PKGINFO)
           mkdir -p apk_control
-          cat > apk_control/.PKGINFO <<EOF
-pkgname = luci-app-nfs
-pkgver = $VERSION-r1
-pkgdesc = LuCI app for NFS kernel server management
-url = https://github.com/RPDevs-Builds/luci-app-nfs
-builddate = $(date +%s)
-packager = Gemini CLI
-arch = all
-depend = luci-base
-depend = nfs-kernel-server
-EOF
+          echo "pkgname = luci-app-nfs" > apk_control/.PKGINFO
+          echo "pkgver = $VERSION-r1" >> apk_control/.PKGINFO
+          echo "pkgdesc = LuCI app for NFS kernel server management" >> apk_control/.PKGINFO
+          echo "url = https://github.com/RPDevs-Builds/luci-app-nfs" >> apk_control/.PKGINFO
+          echo "builddate = $(date +%s)" >> apk_control/.PKGINFO
+          echo "packager = Gemini CLI" >> apk_control/.PKGINFO
+          echo "arch = all" >> apk_control/.PKGINFO
+          echo "depend = luci-base" >> apk_control/.PKGINFO
+          echo "depend = nfs-kernel-server" >> apk_control/.PKGINFO
           tar -zc -f control.tar.gz -C apk_control .PKGINFO
           
           # 3. Combine into final APK (Control + Data)
