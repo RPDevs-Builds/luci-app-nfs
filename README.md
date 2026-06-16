@@ -39,13 +39,14 @@ opkg install nfs-kernel-server kmod-fs-nfs nfs-utils
 Download the latest `.ipk` or `.apk` package from the [Releases](https://github.com/RPDevs-Builds/luci-app-nfs/releases) page and install it:
 
 #### Using APK (OpenWrt v26+)
+Because the package is sideloaded and not signed by an official repository key, you must use the `--allow-untrusted` flag:
 ```bash
-apk add luci-app-nfs_1.0-r1.apk
+apk add --allow-untrusted luci-app-nfs-1.0.6-r1.apk
 ```
 
 #### Using OPKG (Older versions)
 ```bash
-opkg install luci-app-nfs_1.0-1_all.ipk
+opkg install luci-app-nfs_1.0.6-1_all.ipk
 ```
 
 ## Configuration
