@@ -135,8 +135,8 @@ jobs:
           APK_FILE=$(ls compiled/apk/luci-app-nfs-*.apk | head -n 1)
           echo "Testing installation of $APK_FILE"
           # Assuming the runner has SSH access to the router via keys
-          scp "$APK_FILE" root@router.lan:/tmp/test.apk
-          ssh root@router.lan "apk add --allow-untrusted /tmp/test.apk && /etc/init.d/nfsd reload"
+          scp "$APK_FILE" root@192.168.2.1:/tmp/test.apk
+          ssh root@192.168.2.1 "apk add --allow-untrusted /tmp/test.apk && /etc/init.d/nfsd reload"
 
   release:
     needs: test
