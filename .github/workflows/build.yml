@@ -26,17 +26,46 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential libncurses5-dev gawk git gettext libssl-dev xsltproc wget unzip python3
 
+      - name: Extract version
+        id: get_version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION="1.0-$(date +%Y%m%d)"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version $VERSION"
+
       - name: Build luci-app-nfs (ipk)
         run: |
-          echo "Building IPK..."
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          echo "Building IPK v$VERSION..."
           mkdir -p compiled/packages
-          tar -cvzf compiled/packages/luci-app-nfs_1.0-1_all.ipk -C source/luci-app-nfs .
+          # Create a basic opkg structure: control and data
+          mkdir -p ipk_tmp/CONTROL
+          cat > ipk_tmp/CONTROL/control <<EOF
+Package: luci-app-nfs
+Version: $VERSION-1
+Architecture: all
+Maintainer: Gemini CLI
+Depends: luci-base, nfs-kernel-server
+Description: LuCI app for NFS kernel server management
+EOF
+          cp -r source/luci-app-nfs/root ipk_tmp/
+          cp -r source/luci-app-nfs/htdocs ipk_tmp/
+          tar -cvzf compiled/packages/luci-app-nfs_${VERSION}-1_all.ipk -C ipk_tmp .
 
       - name: Build luci-app-nfs (apk)
         run: |
-          echo "Building APK..."
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          echo "Building APK v$VERSION..."
           mkdir -p compiled/apk
-          tar -cvzf compiled/apk/luci-app-nfs-1.0-r1.apk -C source/luci-app-nfs .
+          # APK structure is different, but for now we create a distinct tar
+          mkdir -p apk_tmp
+          cp -r source/luci-app-nfs/* apk_tmp/
+          echo "pkgver=$VERSION" > apk_tmp/.APKINDEX
+          tar -cvzf compiled/apk/luci-app-nfs-${VERSION}-r1.apk -C apk_tmp .
 
       - name: Sync compiled output to repository
         if: github.event_name != 'pull_request'
@@ -44,7 +73,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add compiled/
-          git commit -m "Update compiled artifacts [skip ci]" || echo "No changes to commit"
+          git commit -m "Update compiled artifacts v${{ steps.get_version.outputs.VERSION }} [skip ci]" || echo "No changes to commit"
           git push origin HEAD:${{ github.ref }} || echo "Failed to push"
 
       - name: Upload artifacts
