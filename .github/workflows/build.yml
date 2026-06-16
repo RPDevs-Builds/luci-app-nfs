@@ -39,29 +39,25 @@ jobs:
 
       - name: Build luci-app-nfs (ipk)
         run: |
-          VERSION=${{ steps.get_version.outputs.VERSION }}
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
           echo "Building IPK v$VERSION..."
           mkdir -p compiled/packages
-          # Create a basic opkg structure: control and data
           mkdir -p ipk_tmp/CONTROL
-          cat > ipk_tmp/CONTROL/control <<EOF
-Package: luci-app-nfs
-Version: $VERSION-1
-Architecture: all
-Maintainer: Gemini CLI
-Depends: luci-base, nfs-kernel-server
-Description: LuCI app for NFS kernel server management
-EOF
+          echo "Package: luci-app-nfs" > ipk_tmp/CONTROL/control
+          echo "Version: $VERSION-1" >> ipk_tmp/CONTROL/control
+          echo "Architecture: all" >> ipk_tmp/CONTROL/control
+          echo "Maintainer: Gemini CLI" >> ipk_tmp/CONTROL/control
+          echo "Depends: luci-base, nfs-kernel-server" >> ipk_tmp/CONTROL/control
+          echo "Description: LuCI app for NFS kernel server management" >> ipk_tmp/CONTROL/control
           cp -r source/luci-app-nfs/root ipk_tmp/
           cp -r source/luci-app-nfs/htdocs ipk_tmp/
           tar -cvzf compiled/packages/luci-app-nfs_${VERSION}-1_all.ipk -C ipk_tmp .
 
       - name: Build luci-app-nfs (apk)
         run: |
-          VERSION=${{ steps.get_version.outputs.VERSION }}
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
           echo "Building APK v$VERSION..."
           mkdir -p compiled/apk
-          # APK structure is different, but for now we create a distinct tar
           mkdir -p apk_tmp
           cp -r source/luci-app-nfs/* apk_tmp/
           echo "pkgver=$VERSION" > apk_tmp/.APKINDEX
