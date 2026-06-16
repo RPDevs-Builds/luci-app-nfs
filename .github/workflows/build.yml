@@ -91,6 +91,13 @@ jobs:
           # 3. Combine into final APK (Control + Data)
           cat control.tar.gz data.tar.gz > compiled/apk/luci-app-nfs-${VERSION}-r1.apk
 
+      - name: Create Source Tarball
+        run: |
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          echo "Creating source tarball v$VERSION..."
+          mkdir -p compiled/source
+          tar -cvzf compiled/source/luci-app-nfs-${VERSION}.tar.gz -C source/luci-app-nfs .
+
       - name: Sync compiled output to repository
         if: github.event_name != 'pull_request'
         run: |
@@ -123,5 +130,6 @@ jobs:
           files: |
             compiled/packages/*.ipk
             compiled/apk/*.apk
+            compiled/source/*.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
