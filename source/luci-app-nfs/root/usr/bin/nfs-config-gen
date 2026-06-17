@@ -38,8 +38,10 @@ log "Generating NFS configurations..."
 mkdir -p "$NFS_D" "$RPC_PIPEFS_D"
 
 # Fix for native script "Resource busy" error
-grep -q "/proc/fs/nfsd" /proc/mounts || mount -t nfsd nfsd /proc/fs/nfsd 2>/dev/null
-grep -q "$RPC_PIPEFS_D" /proc/mounts || mount -t rpc_pipefs sunrpc "$RPC_PIPEFS_D" 2>/dev/null
+# We check by filesystem type because /var is a symlink to /tmp on this system,
+# causing the native script's path-based grep to fail and try to double-mount.
+grep -q "nfsd" /proc/mounts || mount -t nfsd nfsd /proc/fs/nfsd 2>/dev/null
+grep -q "rpc_pipefs" /proc/mounts || mount -t rpc_pipefs sunrpc "$RPC_PIPEFS_D" 2>/dev/null
 
 # Generate /etc/exports
 echo "# Generated from UCI /etc/config/nfs" > "$EXPORTS_FILE"
