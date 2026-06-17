@@ -80,9 +80,23 @@ return view.extend({
 						'class': 'btn cbi-button-apply',
 						'onclick': function(ev) {
 							ev.preventDefault();
+							var ta = document.getElementById('nfs_logs');
+							ta.value = _('Loading logs...');
 							return fs.exec('logread', ['-e', 'nfs']).then(function(res) {
-								var ta = document.getElementById('nfs_logs');
-								ta.value = res.stdout || _('No NFS related logs found.');
+								if (res.stdout) {
+									ta.value = res.stdout;
+								} else {
+									throw new Error('Empty');
+								}
+							}).catch(function() {
+								// Fallback to dmesg if logread is empty or fails (e.g. remote logging enabled)
+								return fs.exec('dmesg').then(function(res) {
+									var lines = res.stdout.split('\n').filter(function(l) {
+										return l.toLowerCase().indexOf('nfs') !== -1;
+									});
+									ta.value = lines.join('\n') || _('No NFS related logs found in logread or dmesg.');
+								});
+							}).then(function() {
 								ta.scrollTop = ta.scrollHeight;
 							});
 						}
