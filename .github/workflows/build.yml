@@ -86,7 +86,7 @@ jobs:
           
           # Generate APK v3 (ADBd) format using mkpkg
           ./apk_tool/sbin/apk.static mkpkg \
-            --info name:luci-app-nfs-v3 \
+            --info name:luci-app-nfs \
             --info version:${VERSION}-r1 \
             --info description:"LuCI app for NFS kernel server management" \
             --info arch:all \
@@ -94,8 +94,12 @@ jobs:
             --info origin:luci-app-nfs \
             --info maintainer:"Gemini CLI" \
             --info url:"https://github.com/RPDevs-Builds/luci-app-nfs" \
+            --info depends:luci-base \
             --files apk_data \
             --output compiled/apk/luci-app-nfs-${VERSION}-r1.apk
+            
+          # Restore ownership for CI cleanup
+          sudo chown -R $(id -u):$(id -g) apk_data
 
       - name: Create Source Tarball
         run: |
