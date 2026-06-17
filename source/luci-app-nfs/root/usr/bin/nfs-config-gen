@@ -1,5 +1,4 @@
 #!/bin/sh
-. /lib/functions.conf
 . /lib/functions.sh
 
 NFS_CONF=/etc/nfs.conf
@@ -7,30 +6,38 @@ EXPORTS_FILE=/etc/exports
 NFS_D=/var/lib/nfs
 RPC_PIPEFS_D=/var/lib/nfs/rpc_pipefs
 
+log() {
+    logger -t "nfs-config-gen" "$1"
+    echo "$1"
+}
+
 write_share() {
     local cfg="$1"
     local path clients options
     config_get path "$cfg" path
     config_get clients "$cfg" clients "*"
     config_get options "$cfg" options "rw,sync,no_subtree_check"
-    [ -n "$path" ] && echo "$path $clients($options)" >> "$EXPORTS_FILE"
+    if [ -n "$path" ]; then
+        log "Adding export: $path $clients($options)"
+        echo "$path $clients($options)" >> "$EXPORTS_FILE"
+    fi
 }
 
 config_load nfs
 config_get_bool enabled globals enabled 0
 
-# If disabled, ensure service is stopped and exit
 if [ "$enabled" -eq 0 ]; then
+    log "NFS server is disabled in UCI. Stopping service."
     /etc/init.d/nfsd stop 2>/dev/null
     exit 0
 fi
 
+log "Generating NFS configurations..."
+
 # Ensure directories exist
 mkdir -p "$NFS_D" "$RPC_PIPEFS_D"
 
-# Fix for native script "Resource busy" error: 
-# The native script doesn't recognize /tmp mounts in its grep.
-# We ensure it's mounted where it expects or it's already there.
+# Fix for native script "Resource busy" error
 grep -q "/proc/fs/nfsd" /proc/mounts || mount -t nfsd nfsd /proc/fs/nfsd 2>/dev/null
 grep -q "$RPC_PIPEFS_D" /proc/mounts || mount -t rpc_pipefs sunrpc "$RPC_PIPEFS_D" 2>/dev/null
 
@@ -46,7 +53,8 @@ config_get_bool nfs_v4 globals nfs_v4 1
 config_get_bool udp globals udp 0
 config_get_bool tcp globals tcp 1
 
-# Note: nfs-kernel-server uses y/n for booleans in nfs.conf
+log "Updating $NFS_CONF (v3=$nfs_v3, v4=$nfs_v4, port=$port, threads=$threads)"
+
 cat > "$NFS_CONF" <<CONF
 [nfsd]
 threads=$threads
@@ -57,7 +65,11 @@ vers3=$( [ "$nfs_v3" -eq 1 ] && echo "y" || echo "n" )
 vers4=$( [ "$nfs_v4" -eq 1 ] && echo "y" || echo "n" )
 CONF
 
-# Ensure rpcbind is started (required for NFS)
-/etc/init.d/rpcbind enabled || /etc/init.d/rpcbind enable
-/etc/init.d/rpcbind start
+# Ensure rpcbind is started
+if ! /etc/init.d/rpcbind status | grep -q "running"; then
+    log "Starting rpcbind..."
+    /etc/init.d/rpcbind enable 2>/dev/null
+    /etc/init.d/rpcbind start
+fi
+
 

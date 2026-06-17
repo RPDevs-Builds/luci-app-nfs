@@ -80,9 +80,9 @@ return view.extend({
 						'class': 'btn cbi-button-apply',
 						'onclick': function(ev) {
 							ev.preventDefault();
-							return fs.exec('logread', ['-e', 'nfsd']).then(function(res) {
+							return fs.exec('logread', ['-e', 'nfs']).then(function(res) {
 								var ta = document.getElementById('nfs_logs');
-								ta.value = res.stdout || _('No NFS logs found.');
+								ta.value = res.stdout || _('No NFS related logs found.');
 								ta.scrollTop = ta.scrollHeight;
 							});
 						}
