@@ -89,7 +89,6 @@ jobs:
             --info maintainer:"Gemini CLI" \
             --info url:"https://github.com/RPDevs-Builds/luci-app-nfs" \
             --info depends:luci-base \
-            --info depends:nfs-kernel-server \
             --files apk_data \
             --output compiled/apk/luci-app-nfs-${VERSION}-r1.apk
 
