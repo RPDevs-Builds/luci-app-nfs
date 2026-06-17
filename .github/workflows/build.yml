@@ -55,7 +55,7 @@ jobs:
           echo "Version: $VERSION-1" >> ipk_tmp/CONTROL/control
           echo "Architecture: all" >> ipk_tmp/CONTROL/control
           echo "Maintainer: Gemini CLI" >> ipk_tmp/CONTROL/control
-          echo "Depends: luci-base, nfs-kernel-server" >> ipk_tmp/CONTROL/control
+          echo "Depends: luci-base" >> ipk_tmp/CONTROL/control
           echo "Description: LuCI app for NFS kernel server management" >> ipk_tmp/CONTROL/control
           [ -d source/luci-app-nfs/root ] && cp -r source/luci-app-nfs/root/. ipk_tmp/
           [ -d source/luci-app-nfs/htdocs ] && {
@@ -86,7 +86,7 @@ jobs:
           # Fix ownership and permissions for OpenWrt
           # APKv3 preserves these in the metadata
           sudo chown -R 0:0 apk_data
-          sudo chmod 0755 apk_data/etc/init.d/nfs-luci
+          [ -f apk_data/usr/bin/nfs-config-gen ] && sudo chmod 0755 apk_data/usr/bin/nfs-config-gen
           
           # Generate APK v3 (ADBd) format using mkpkg
           ./apk_tool/sbin/apk.static mkpkg \

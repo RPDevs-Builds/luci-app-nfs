@@ -53,6 +53,19 @@ return view.extend({
 		o.default = '0';
 		o.rmempty = false;
 
+		o = s.taboption('general', form.Button, '_apply', _('Apply Settings'), _('Generate the native configuration files and reload the NFS service.'));
+		o.inputtitle = _('Apply');
+		o.inputstyle = 'apply';
+		o.onclick = function() {
+			return fs.exec('/usr/bin/nfs-config-gen').then(function() {
+				return fs.exec('/etc/init.d/nfsd', ['reload']).then(function() {
+					ui.addNotification(null, E('p', _('NFS settings applied and service reloaded.')), 'info');
+				});
+			}).catch(function(e) {
+				ui.addNotification(null, E('p', _('Failed to apply settings: %s').format(e.message)), 'error');
+			});
+		};
+
 
 		s = m.section(form.TableSection, 'share', _('Shared Directories'),
 			_('List of directories to be shared via NFS. Each entry defines a path and the clients allowed to access it.'));
