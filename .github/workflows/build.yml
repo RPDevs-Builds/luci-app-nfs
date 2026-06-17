@@ -93,12 +93,11 @@ jobs:
             --info name:luci-app-nfs \
             --info version:${VERSION}-r1 \
             --info description:"LuCI app for NFS kernel server management" \
-            --info arch:all \
+            --info arch:aarch64_cortex-a53 \
             --info license:Apache-2.0 \
-            --info origin:luci-app-nfs \
+            --info origin:feeds/luci/modules/luci-app-nfs \
             --info maintainer:"Gemini CLI" \
             --info url:"https://github.com/RPDevs-Builds/luci-app-nfs" \
-            --info depends:luci-base \
             --files apk_data \
             --output compiled/apk/luci-app-nfs-${VERSION}-r1.apk
             
