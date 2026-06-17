@@ -4,6 +4,8 @@
 
 NFS_CONF=/etc/nfs.conf
 EXPORTS_FILE=/etc/exports
+NFS_D=/var/lib/nfs
+RPC_PIPEFS_D=/var/lib/nfs/rpc_pipefs
 
 write_share() {
     local cfg="$1"
@@ -16,7 +18,21 @@ write_share() {
 
 config_load nfs
 config_get_bool enabled globals enabled 0
-[ "$enabled" -eq 0 ] && exit 0
+
+# If disabled, ensure service is stopped and exit
+if [ "$enabled" -eq 0 ]; then
+    /etc/init.d/nfsd stop 2>/dev/null
+    exit 0
+fi
+
+# Ensure directories exist
+mkdir -p "$NFS_D" "$RPC_PIPEFS_D"
+
+# Fix for native script "Resource busy" error: 
+# The native script doesn't recognize /tmp mounts in its grep.
+# We ensure it's mounted where it expects or it's already there.
+grep -q "/proc/fs/nfsd" /proc/mounts || mount -t nfsd nfsd /proc/fs/nfsd 2>/dev/null
+grep -q "$RPC_PIPEFS_D" /proc/mounts || mount -t rpc_pipefs sunrpc "$RPC_PIPEFS_D" 2>/dev/null
 
 # Generate /etc/exports
 echo "# Generated from UCI /etc/config/nfs" > "$EXPORTS_FILE"
@@ -30,6 +46,7 @@ config_get_bool nfs_v4 globals nfs_v4 1
 config_get_bool udp globals udp 0
 config_get_bool tcp globals tcp 1
 
+# Note: nfs-kernel-server uses y/n for booleans in nfs.conf
 cat > "$NFS_CONF" <<CONF
 [nfsd]
 threads=$threads
@@ -39,3 +56,8 @@ tcp=$( [ "$tcp" -eq 1 ] && echo "y" || echo "n" )
 vers3=$( [ "$nfs_v3" -eq 1 ] && echo "y" || echo "n" )
 vers4=$( [ "$nfs_v4" -eq 1 ] && echo "y" || echo "n" )
 CONF
+
+# Ensure rpcbind is started (required for NFS)
+/etc/init.d/rpcbind enabled || /etc/init.d/rpcbind enable
+/etc/init.d/rpcbind start
+
