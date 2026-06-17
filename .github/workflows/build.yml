@@ -60,36 +60,38 @@ jobs:
           }
           tar -cvzf compiled/packages/luci-app-nfs_${VERSION}-1_all.ipk -C ipk_tmp .
 
-      - name: Build luci-app-nfs (apk)
+      - name: Build luci-app-nfs (APK v3)
         run: |
           VERSION="${{ steps.get_version.outputs.VERSION }}"
-          echo "Building APK v$VERSION..."
+          echo "Building APK v3 v$VERSION..."
           mkdir -p compiled/apk
           
-          # 1. Create Data Tarball
+          # Download static apk-tools v3 from Alpine Edge
+          wget -qO apk.tar.gz https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/apk-tools-static-3.0.6-r0.apk
+          mkdir -p apk_tool
+          tar -xzf apk.tar.gz -C apk_tool
+          
+          # Prepare data payload directory
           mkdir -p apk_data
           [ -d source/luci-app-nfs/root ] && cp -r source/luci-app-nfs/root/. apk_data/
           [ -d source/luci-app-nfs/htdocs ] && {
             mkdir -p apk_data/www
             cp -r source/luci-app-nfs/htdocs/. apk_data/www/
           }
-          tar -c --owner=0 --group=0 -C apk_data . | gzip -9n > data.tar.gz
           
-          # 2. Create Control Tarball (.PKGINFO)
-          mkdir -p apk_control
-          echo "pkgname = luci-app-nfs" > apk_control/.PKGINFO
-          echo "pkgver = $VERSION-r1" >> apk_control/.PKGINFO
-          echo "pkgdesc = LuCI app for NFS kernel server management" >> apk_control/.PKGINFO
-          echo "url = https://github.com/RPDevs-Builds/luci-app-nfs" >> apk_control/.PKGINFO
-          echo "builddate = $(date +%s)" >> apk_control/.PKGINFO
-          echo "packager = Gemini CLI" >> apk_control/.PKGINFO
-          echo "arch = all" >> apk_control/.PKGINFO
-          echo "depend = luci-base" >> apk_control/.PKGINFO
-          echo "depend = nfs-kernel-server" >> apk_control/.PKGINFO
-          tar -c --owner=0 --group=0 -C apk_control .PKGINFO | gzip -9n > control.tar.gz
-          
-          # 3. Combine into final APK (Control + Data)
-          cat control.tar.gz data.tar.gz > compiled/apk/luci-app-nfs-${VERSION}-r1.apk
+          # Generate APK v3 (ADBd) format using mkpkg
+          ./apk_tool/sbin/apk.static mkpkg \
+            --info name:luci-app-nfs \
+            --info version:${VERSION}-r1 \
+            --info description:"LuCI app for NFS kernel server management" \
+            --info arch:all \
+            --info license:Apache-2.0 \
+            --info maintainer:"Gemini CLI" \
+            --info url:"https://github.com/RPDevs-Builds/luci-app-nfs" \
+            --info depends:luci-base \
+            --info depends:nfs-kernel-server \
+            --files apk_data \
+            --output compiled/apk/luci-app-nfs-${VERSION}-r1.apk
 
       - name: Create Source Tarball
         run: |
