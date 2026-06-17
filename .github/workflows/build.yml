@@ -79,6 +79,11 @@ jobs:
             cp -r source/luci-app-nfs/htdocs/. apk_data/www/
           }
           
+          # Fix ownership and permissions for OpenWrt
+          # APKv3 preserves these in the metadata
+          sudo chown -R 0:0 apk_data
+          sudo chmod 0755 apk_data/etc/init.d/nfs-luci
+          
           # Generate APK v3 (ADBd) format using mkpkg
           ./apk_tool/sbin/apk.static mkpkg \
             --info name:luci-app-nfs \
@@ -86,6 +91,7 @@ jobs:
             --info description:"LuCI app for NFS kernel server management" \
             --info arch:all \
             --info license:Apache-2.0 \
+            --info origin:luci-app-nfs \
             --info maintainer:"Gemini CLI" \
             --info url:"https://github.com/RPDevs-Builds/luci-app-nfs" \
             --info depends:luci-base \
