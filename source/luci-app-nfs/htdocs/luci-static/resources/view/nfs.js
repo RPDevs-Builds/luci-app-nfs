@@ -23,6 +23,7 @@ return view.extend({
 
 		s.tab('general',  _('General Settings'));
 		s.tab('advanced', _('Advanced Settings'));
+		s.tab('logs',     _('Logs'));
 		
 		o = s.taboption('general', form.Flag, 'enabled', _('Enable NFS server'), _('Global switch to enable or disable the NFS server service.'));
 		o.rmempty = false;
@@ -52,6 +53,43 @@ return view.extend({
 		o = s.taboption('advanced', form.Flag, 'udp', _('Enable UDP'), _('Allow clients to connect using the UDP protocol. Use only if required by legacy clients.'));
 		o.default = '0';
 		o.rmempty = false;
+
+		o = s.taboption('logs', form.ListValue, 'log_level', _('Log Level'));
+		o.value('emerg',   _('Emergency'));
+		o.value('alert',   _('Alert'));
+		o.value('crit',    _('Critical'));
+		o.value('err',     _('Error'));
+		o.value('warning', _('Warning'));
+		o.value('notice',  _('Notice'));
+		o.value('info',    _('Info'));
+		o.value('debug',   _('Debug'));
+		o.default = 'notice';
+
+		o = s.taboption('logs', form.DummyValue, '_logs');
+		o.rawhtml = true;
+		o.render = function() {
+			return E('div', [
+				E('textarea', {
+					'id': 'nfs_logs',
+					'readonly': 'readonly',
+					'style': 'width: 100%; height: 300px; font-family: monospace; font-size: 12px; background: #000; color: #0f0; border: 1px solid #333; padding: 10px;',
+					'placeholder': _('Click "Refresh" to load logs...')
+				}),
+				E('div', { 'class': 'right' }, [
+					E('button', {
+						'class': 'btn cbi-button-apply',
+						'onclick': function(ev) {
+							ev.preventDefault();
+							return fs.exec('logread', ['-e', 'nfsd']).then(function(res) {
+								var ta = document.getElementById('nfs_logs');
+								ta.value = res.stdout || _('No NFS logs found.');
+								ta.scrollTop = ta.scrollHeight;
+							});
+						}
+					}, _('Refresh Logs'))
+				])
+			]);
+		};
 
 		o = s.taboption('general', form.Button, '_apply', _('Apply Settings'), _('Generate the native configuration files and reload the NFS service.'));
 		o.inputtitle = _('Apply');

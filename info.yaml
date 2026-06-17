@@ -1,5 +1,0 @@
-info:
-  name: luci-app-nfs-test
-  version: 1.0.0
-  description: Test package
-  arch: all
