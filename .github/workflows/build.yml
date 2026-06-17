@@ -15,6 +15,10 @@ jobs:
   build:
     runs-on: self-hosted
     steps:
+      - name: Cleanup workspace
+        run: |
+          sudo rm -rf ./* || true
+          
       - name: Checkout
         uses: actions/checkout@v4
         with:
